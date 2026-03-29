@@ -13,50 +13,176 @@
     <main class="shell">
         <section class="hero">
             <p class="eyebrow">GB 5009.225-2023 表 B.1</p>
-            <h1>酒精计温度换算器</h1>
-            <p class="intro">输入蒸馏后酒样的酒精计读数和测量温度，直接换算出 20℃ 标准酒精度。</p>
+            <h1>酒精配比计算器</h1>
+            <p class="intro">把温度换算、重量体积换算、混合求结果、目标反推和加水降度放到一个手机页面里，现场输入就能直接算。</p>
             <p class="range" id="range-text"></p>
         </section>
 
-        <section class="calculator-card">
-            <form id="calculator-form">
-                <div class="form-group">
-                    <label for="temp-input">测量温度</label>
-                    <div class="input-row">
-                        <input type="number" id="temp-input" step="0.1" inputmode="decimal" placeholder="例如 24.5" required>
-                        <span class="unit">℃</span>
+        <section class="tool-tabs">
+            <button class="tool-tab active" data-tab="temp-tool">温度换算</button>
+            <button class="tool-tab" data-tab="convert-tool">重量体积</button>
+            <button class="tool-tab" data-tab="blend-tool">混合结果</button>
+            <button class="tool-tab" data-tab="target-tool">目标反推</button>
+            <button class="tool-tab" data-tab="dilute-tool">加水降度</button>
+        </section>
+
+        <section class="tool-panel active" id="temp-tool">
+            <div class="calculator-card">
+                <form id="temp-form">
+                    <div class="grid-two">
+                        <div class="form-group">
+                            <label for="temp-input">测量温度</label>
+                            <div class="input-row">
+                                <input type="number" id="temp-input" step="0.1" inputmode="decimal" placeholder="例如 24.5" required>
+                                <span class="unit">℃</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="alcohol-input">酒精计读数</label>
+                            <div class="input-row">
+                                <input type="number" id="alcohol-input" step="0.1" inputmode="decimal" placeholder="例如 10.8" required>
+                                <span class="unit">%vol</span>
+                            </div>
+                        </div>
                     </div>
+                    <button class="btn-primary" type="submit">换算到 20℃</button>
+                </form>
+
+                <div class="examples">
+                    <span>快速示例</span>
+                    <button type="button" data-example-temp="24.5" data-example-alcohol="10.8">24.5℃ / 10.8</button>
+                    <button type="button" data-example-temp="15.5" data-example-alcohol="52.3">15.5℃ / 52.3</button>
                 </div>
 
-                <div class="form-group">
-                    <label for="alcohol-input">酒精计读数</label>
-                    <div class="input-row">
-                        <input type="number" id="alcohol-input" step="0.1" inputmode="decimal" placeholder="例如 10.8" required>
-                        <span class="unit">%vol</span>
-                    </div>
+                <div class="result-card" id="temp-result">
+                    <p class="result-status" id="temp-status">换算结果</p>
+                    <p class="result-output" id="temp-output">等待输入</p>
+                    <p class="result-detail" id="temp-detail">输入温度和酒精计读数后，这里会显示 20℃ 标准酒精度。</p>
+                    <div class="result-basis" id="temp-basis"></div>
                 </div>
-
-                <button class="btn-primary" type="submit">换算到 20℃</button>
-            </form>
-
-            <div class="examples">
-                <span>快速示例</span>
-                <button type="button" data-example-temp="24.5" data-example-alcohol="10.8">24.5℃ / 10.8</button>
-                <button type="button" data-example-temp="15.5" data-example-alcohol="52.3">15.5℃ / 52.3</button>
             </div>
+        </section>
 
-            <div class="result-card" id="result">
-                <p class="result-status" id="result-status">换算结果</p>
-                <p class="result-output" id="result-output">等待输入</p>
-                <p class="result-detail" id="result-detail">输入温度和酒精计读数后，这里会显示 20℃ 标准酒精度。</p>
-                <div class="result-basis" id="result-basis"></div>
+        <section class="tool-panel" id="convert-tool">
+            <div class="calculator-card">
+                <form id="convert-form">
+                    <div class="grid-two">
+                        <div class="form-group">
+                            <label for="convert-alcohol">酒度</label>
+                            <div class="input-row">
+                                <input type="number" id="convert-alcohol" step="0.1" inputmode="decimal" placeholder="例如 42" required>
+                                <span class="unit">%vol</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="convert-amount">数量</label>
+                            <div class="input-row">
+                                <input type="number" id="convert-amount" step="0.001" inputmode="decimal" placeholder="例如 10" required>
+                                <select class="unit-select" id="convert-unit">
+                                    <option value="weight">公斤</option>
+                                    <option value="volume">升</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-primary" type="submit">换算重量或体积</button>
+                </form>
+                <div class="result-card" id="convert-result"></div>
+            </div>
+        </section>
+
+        <section class="tool-panel" id="blend-tool">
+            <div class="calculator-card">
+                <form id="blend-form">
+                    <div id="blend-items"></div>
+                    <button class="ghost-button" type="button" id="add-blend-item">+ 添加一种酒</button>
+                    <button class="btn-primary" type="submit">计算混合后酒度</button>
+                </form>
+                <div class="result-card" id="blend-result"></div>
+            </div>
+        </section>
+
+        <section class="tool-panel" id="target-tool">
+            <div class="calculator-card">
+                <form id="target-form">
+                    <div class="grid-two">
+                        <div class="form-group">
+                            <label for="target-source-a">原酒 A 酒度</label>
+                            <div class="input-row">
+                                <input type="number" id="target-source-a" step="0.1" inputmode="decimal" placeholder="例如 42" required>
+                                <span class="unit">%vol</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="target-source-b">原酒 B 酒度</label>
+                            <div class="input-row">
+                                <input type="number" id="target-source-b" step="0.1" inputmode="decimal" placeholder="例如 95" required>
+                                <span class="unit">%vol</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="target-alcohol">目标酒度</label>
+                            <div class="input-row">
+                                <input type="number" id="target-alcohol" step="0.1" inputmode="decimal" placeholder="例如 52" required>
+                                <span class="unit">%vol</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="target-amount">目标数量</label>
+                            <div class="input-row">
+                                <input type="number" id="target-amount" step="0.001" inputmode="decimal" placeholder="例如 50" required>
+                                <select class="unit-select" id="target-unit">
+                                    <option value="weight">公斤</option>
+                                    <option value="volume">升</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-primary" type="submit">反推两种酒的用量</button>
+                </form>
+                <div class="result-card" id="target-result"></div>
+            </div>
+        </section>
+
+        <section class="tool-panel" id="dilute-tool">
+            <div class="calculator-card">
+                <form id="dilute-form">
+                    <div class="grid-two">
+                        <div class="form-group">
+                            <label for="dilute-source-alcohol">原酒酒度</label>
+                            <div class="input-row">
+                                <input type="number" id="dilute-source-alcohol" step="0.1" inputmode="decimal" placeholder="例如 95" required>
+                                <span class="unit">%vol</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="dilute-source-amount">原酒数量</label>
+                            <div class="input-row">
+                                <input type="number" id="dilute-source-amount" step="0.001" inputmode="decimal" placeholder="例如 10" required>
+                                <select class="unit-select" id="dilute-source-unit">
+                                    <option value="weight">公斤</option>
+                                    <option value="volume">升</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="dilute-target-alcohol">目标酒度</label>
+                            <div class="input-row">
+                                <input type="number" id="dilute-target-alcohol" step="0.1" inputmode="decimal" placeholder="例如 42" required>
+                                <span class="unit">%vol</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-primary" type="submit">计算加水量</button>
+                </form>
+                <div class="result-card" id="dilute-result"></div>
             </div>
         </section>
     </main>
 
-    <script src="data.js?v=20260329-3"></script>
-    <script src="derived-grid.js?v=20260329-3"></script>
-    <script src="calculator.js?v=20260329-3"></script>
-    <script src="app.js?v=20260329-3"></script>
+    <script src="data.js?v=20260329-4"></script>
+    <script src="derived-grid.js?v=20260329-4"></script>
+    <script src="calculator.js?v=20260329-4"></script>
+    <script src="app.js?v=20260329-4"></script>
 </body>
 </html>

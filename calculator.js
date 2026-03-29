@@ -38,7 +38,11 @@
 
     const correctionTable = tables.tempCorrectionTable;
     const derivedCorrectionTable = tables.derivedTempCorrectionTable;
+    const densityTable = tables.densityTable || {};
     const sortedTemperatures = Object.keys(correctionTable)
+        .map(Number)
+        .sort((a, b) => a - b);
+    const sortedDensityAlcohols = Object.keys(densityTable)
         .map(Number)
         .sort((a, b) => a - b);
 
@@ -253,6 +257,220 @@
         };
     }
 
+    function getDensity(alcohol) {
+        if (!sortedDensityAlcohols.length) {
+            return null;
+        }
+        if (alcohol < sortedDensityAlcohols[0] || alcohol > sortedDensityAlcohols[sortedDensityAlcohols.length - 1]) {
+            return null;
+        }
+
+        const exactKey = Number(alcohol).toFixed(2);
+        if (densityTable[exactKey] !== undefined) {
+            return densityTable[exactKey];
+        }
+
+        const bounds = findNeighborBounds(sortedDensityAlcohols, alcohol);
+        if (!bounds) {
+            return null;
+        }
+        return linearInterpolate(
+            alcohol,
+            bounds.lower,
+            bounds.upper,
+            densityTable[bounds.lower.toFixed(2)],
+            densityTable[bounds.upper.toFixed(2)]
+        );
+    }
+
+    function normalizeAmountInput(amount, unit, alcohol) {
+        const density = getDensity(alcohol);
+        if (!density || amount <= 0) {
+            return null;
+        }
+
+        if (unit === "weight") {
+            return {
+                alcohol,
+                density,
+                weight: amount,
+                volume: amount / density,
+                ethanolVolume: (amount / density) * alcohol / 100,
+            };
+        }
+
+        if (unit === "volume") {
+            return {
+                alcohol,
+                density,
+                weight: amount * density,
+                volume: amount,
+                ethanolVolume: amount * alcohol / 100,
+            };
+        }
+
+        return null;
+    }
+
+    function solveAlcoholFromMassAndEthanolVolume(totalWeight, ethanolVolume) {
+        const minAlcohol = sortedDensityAlcohols[0];
+        const maxAlcohol = sortedDensityAlcohols[sortedDensityAlcohols.length - 1];
+        let low = minAlcohol;
+        let high = maxAlcohol;
+
+        const target = ethanolVolume;
+        const valueAt = (alcohol) => {
+            const density = getDensity(alcohol);
+            return (totalWeight / density) * alcohol / 100;
+        };
+
+        if (target < valueAt(low) || target > valueAt(high)) {
+            return null;
+        }
+
+        for (let i = 0; i < 60; i += 1) {
+            const mid = (low + high) / 2;
+            const value = valueAt(mid);
+            if (value < target) {
+                low = mid;
+            } else {
+                high = mid;
+            }
+        }
+
+        return (low + high) / 2;
+    }
+
+    function convertBetweenWeightAndVolume({ alcohol, amount, unit }) {
+        const normalized = normalizeAmountInput(amount, unit, alcohol);
+        if (!normalized) {
+            return null;
+        }
+
+        const outputUnit = unit === "weight" ? "volume" : "weight";
+        return {
+            alcohol,
+            density: normalized.density,
+            input: { unit, amount },
+            output: {
+                unit: outputUnit,
+                amount: outputUnit === "volume" ? normalized.volume : normalized.weight,
+            },
+        };
+    }
+
+    function blendByAmount(items) {
+        const normalizedItems = items.map((item) =>
+            normalizeAmountInput(item.amount, item.unit, item.alcohol)
+        );
+        if (normalizedItems.some((item) => item === null)) {
+            return null;
+        }
+
+        const totalWeight = normalizedItems.reduce((sum, item) => sum + item.weight, 0);
+        const totalEthanolVolume = normalizedItems.reduce((sum, item) => sum + item.ethanolVolume, 0);
+        const alcohol = solveAlcoholFromMassAndEthanolVolume(totalWeight, totalEthanolVolume);
+        if (alcohol === null) {
+            return null;
+        }
+        const density = getDensity(alcohol);
+        const totalVolume = totalWeight / density;
+
+        return {
+            alcohol,
+            density,
+            totalWeight,
+            totalVolume,
+            ethanolVolume: totalEthanolVolume,
+        };
+    }
+
+    function solveBlendToTarget({ sourceA, sourceB, targetAlcohol, targetAmount, targetUnit }) {
+        const densityTarget = getDensity(targetAlcohol);
+        const densityA = getDensity(sourceA.alcohol);
+        const densityB = getDensity(sourceB.alcohol);
+        if (!densityTarget || !densityA || !densityB || sourceA.alcohol === sourceB.alcohol) {
+            return null;
+        }
+
+        const totalWeight = targetUnit === "weight" ? targetAmount : targetAmount * densityTarget;
+        const totalVolume = targetUnit === "volume" ? targetAmount : targetAmount / densityTarget;
+        const targetEthanolVolume = totalVolume * targetAlcohol / 100;
+
+        const coefficientA = sourceA.alcohol / 100 / densityA;
+        const coefficientB = sourceB.alcohol / 100 / densityB;
+        const amountAByWeight = (targetEthanolVolume - totalWeight * coefficientB) / (coefficientA - coefficientB);
+        const amountBByWeight = totalWeight - amountAByWeight;
+
+        if (amountAByWeight < 0 || amountBByWeight < 0) {
+            return null;
+        }
+
+        return {
+            targetAlcohol,
+            targetAmount,
+            targetUnit,
+            sourceA: {
+                alcohol: sourceA.alcohol,
+                weight: amountAByWeight,
+                volume: amountAByWeight / densityA,
+                amount: targetUnit === "weight" ? amountAByWeight : amountAByWeight / densityA,
+                unit: targetUnit,
+            },
+            sourceB: {
+                alcohol: sourceB.alcohol,
+                weight: amountBByWeight,
+                volume: amountBByWeight / densityB,
+                amount: targetUnit === "weight" ? amountBByWeight : amountBByWeight / densityB,
+                unit: targetUnit,
+            },
+            final: {
+                alcohol: targetAlcohol,
+                weight: totalWeight,
+                volume: totalVolume,
+            },
+        };
+    }
+
+    function diluteWithWater({ alcohol, amount, unit, targetAlcohol }) {
+        if (targetAlcohol <= 0 || targetAlcohol >= alcohol) {
+            return null;
+        }
+        const source = normalizeAmountInput(amount, unit, alcohol);
+        const waterDensity = getDensity(0);
+        const targetDensity = getDensity(targetAlcohol);
+        if (!source || !waterDensity || !targetDensity) {
+            return null;
+        }
+
+        const finalWeight = source.ethanolVolume / (targetAlcohol / 100 / targetDensity);
+        const waterWeight = finalWeight - source.weight;
+        if (waterWeight < 0) {
+            return null;
+        }
+
+        return {
+            source: {
+                alcohol,
+                weight: source.weight,
+                volume: source.volume,
+                unit,
+                amount,
+            },
+            water: {
+                weight: waterWeight,
+                volume: waterWeight / waterDensity,
+                amount: unit === "weight" ? waterWeight : waterWeight / waterDensity,
+                unit,
+            },
+            final: {
+                alcohol: targetAlcohol,
+                weight: finalWeight,
+                volume: finalWeight / targetDensity,
+            },
+        };
+    }
+
     function explainCorrection(temp, alcohol) {
         const derivedValue = readDerivedValue(temp, alcohol);
         const bounds = getCorrectionBounds(temp, alcohol);
@@ -307,6 +525,11 @@
         linearInterpolate,
         readDerivedValue,
         explainCorrection,
+        getDensity,
+        convertBetweenWeightAndVolume,
+        blendByAmount,
+        solveBlendToTarget,
+        diluteWithWater,
     };
 
     if (typeof module !== "undefined" && module.exports) {

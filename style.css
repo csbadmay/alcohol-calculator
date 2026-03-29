@@ -37,6 +37,37 @@ body {
     gap: 18px;
 }
 
+.tool-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tool-tab {
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.tool-tab.active {
+    background: linear-gradient(180deg, var(--accent), var(--accent-dark));
+    color: #fffaf2;
+    border-color: transparent;
+}
+
+.tool-panel {
+    display: none;
+}
+
+.tool-panel.active {
+    display: block;
+}
+
 .hero {
     padding: 18px 6px 6px;
 }
@@ -77,6 +108,11 @@ body {
     backdrop-filter: blur(16px);
 }
 
+.grid-two {
+    display: grid;
+    gap: 14px;
+}
+
 .form-group + .form-group {
     margin-top: 14px;
 }
@@ -105,6 +141,16 @@ body {
     padding: 16px 18px;
     font-size: 22px;
     color: var(--ink);
+    outline: none;
+}
+
+.input-row select {
+    border: 0;
+    background: transparent;
+    padding: 16px 12px 16px 0;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 700;
     outline: none;
 }
 
@@ -153,6 +199,30 @@ body {
     border-radius: 999px;
     padding: 8px 12px;
     cursor: pointer;
+}
+
+.ghost-button {
+    width: 100%;
+    margin-top: 12px;
+    border: 1px dashed var(--line);
+    background: rgba(255, 255, 255, 0.7);
+    color: var(--ink);
+    border-radius: 16px;
+    padding: 13px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.blend-item {
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.56);
+    border: 1px solid var(--line);
+}
+
+.blend-item + .blend-item {
+    margin-top: 12px;
 }
 
 .result-card {
@@ -209,5 +279,9 @@ body {
     .shell {
         padding-top: 36px;
         padding-bottom: 40px;
+    }
+
+    .grid-two {
+        grid-template-columns: 1fr 1fr;
     }
 }

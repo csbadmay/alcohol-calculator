@@ -1,7 +1,7 @@
 {
-  "name": "酒精计温度换算器",
-  "short_name": "温度换算",
-  "description": "根据 GB 5009.225-2023 表 B.1 换算 20℃ 标准酒精度",
+  "name": "酒精配比计算器",
+  "short_name": "酒精配比",
+  "description": "温度换算、重量体积、混合配比和加水降度计算工具",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#efe7d8",

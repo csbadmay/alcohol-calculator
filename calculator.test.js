@@ -2,6 +2,10 @@ const assert = require("assert");
 
 const {
   correctTemperature,
+  convertBetweenWeightAndVolume,
+  blendByAmount,
+  solveBlendToTarget,
+  diluteWithWater,
   getCorrectionBounds,
   isCorrectionInputSupported,
 } = require("./calculator.js");
@@ -27,5 +31,48 @@ assert.deepStrictEqual(bounds, {
 
 assert.strictEqual(isCorrectionInputSupported(24.5, 10.8), true);
 assert.strictEqual(isCorrectionInputSupported(9.9, 10.8), false);
+
+const convertResult = convertBetweenWeightAndVolume({
+  alcohol: 42,
+  amount: 10,
+  unit: "weight",
+});
+assert.ok(convertResult, "42%vol should support weight/volume conversion");
+assert.strictEqual(convertResult.input.unit, "weight");
+assert.strictEqual(convertResult.output.unit, "volume");
+assert.ok(convertResult.output.amount > 10, "10kg liquor should be more than 10L only if density <1");
+
+const blendResult = blendByAmount([
+  { alcohol: 42, amount: 10, unit: "weight" },
+  { alcohol: 95, amount: 10, unit: "weight" },
+]);
+assert.ok(blendResult, "blend result should exist");
+assert.ok(blendResult.alcohol > 42 && blendResult.alcohol < 95);
+assert.ok(blendResult.totalWeight > 19.9 && blendResult.totalWeight < 20.1);
+
+const targetBlend = solveBlendToTarget({
+  sourceA: { alcohol: 42 },
+  sourceB: { alcohol: 95 },
+  targetAlcohol: 52,
+  targetAmount: 50,
+  targetUnit: "weight",
+});
+assert.ok(targetBlend, "target blend should be solvable");
+approxEqual(targetBlend.sourceA.amount + targetBlend.sourceB.amount, 50, 0.05);
+approxEqual(targetBlend.targetAlcohol, 52, 0.01);
+assert.ok(targetBlend.sourceA.amount > 0);
+assert.ok(targetBlend.sourceB.amount > 0);
+
+const dilution = diluteWithWater({
+  alcohol: 95,
+  amount: 10,
+  unit: "weight",
+  targetAlcohol: 42,
+});
+assert.ok(dilution, "dilution result should exist");
+assert.ok(dilution.water.amount > 0);
+assert.ok(dilution.final.weight > 10);
+assert.ok(dilution.final.volume > dilution.source.volume);
+approxEqual(dilution.final.alcohol, 42, 0.01);
 
 console.log("calculator.test.js passed");
