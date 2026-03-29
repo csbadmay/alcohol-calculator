@@ -39,10 +39,37 @@ body {
 
 .tool-panel {
     display: block;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.38);
+    overflow: hidden;
 }
 
 .tool-panel + .tool-panel {
-    margin-top: -2px;
+    margin-top: 10px;
+}
+
+.panel-summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 16px 18px;
+    font-size: 18px;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.55);
+}
+
+.panel-summary::-webkit-details-marker {
+    display: none;
+}
+
+.panel-summary::after {
+    content: "+";
+    float: right;
+    color: var(--accent);
+}
+
+.tool-panel[open] .panel-summary::after {
+    content: "-";
 }
 
 .hero {
@@ -78,17 +105,11 @@ body {
 
 .calculator-card {
     background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 24px;
+    border: 0;
+    border-radius: 0;
     padding: 18px;
     box-shadow: 0 20px 45px rgba(80, 54, 21, 0.08);
     backdrop-filter: blur(16px);
-}
-
-.panel-title {
-    margin-bottom: 14px;
-    font-size: 20px;
-    line-height: 1.2;
 }
 
 .grid-two {
