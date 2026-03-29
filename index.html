@@ -38,13 +38,13 @@
                             </div>
                         </div>
                     </div>
-                    <button class="btn-primary" type="submit">换算到 20℃</button>
+                    <button class="btn-primary" type="button" onclick="calculateTemperature()">换算到 20℃</button>
                 </form>
 
                 <div class="examples">
                     <span>快速示例</span>
-                    <button type="button" data-example-temp="24.5" data-example-alcohol="10.8">24.5℃ / 10.8</button>
-                    <button type="button" data-example-temp="15.5" data-example-alcohol="52.3">15.5℃ / 52.3</button>
+                    <button type="button" onclick="fillExample(24.5, 10.8)">24.5℃ / 10.8</button>
+                    <button type="button" onclick="fillExample(15.5, 52.3)">15.5℃ / 52.3</button>
                 </div>
 
                 <div class="result-card" id="temp-result">
@@ -79,7 +79,7 @@
                             </div>
                         </div>
                     </div>
-                    <button class="btn-primary" type="submit">换算重量或体积</button>
+                    <button class="btn-primary" type="button" onclick="calculateConvert()">换算重量或体积</button>
                 </form>
                 <div class="result-card" id="convert-result"></div>
             </div>
@@ -90,8 +90,8 @@
             <div class="calculator-card">
                 <form id="blend-form">
                     <div id="blend-items"></div>
-                    <button class="ghost-button" type="button" id="add-blend-item">+ 添加一种酒</button>
-                    <button class="btn-primary" type="submit">计算混合后酒度</button>
+                    <button class="ghost-button" type="button" id="add-blend-item" onclick="document.getElementById('blend-items').appendChild((function(){return window.__createBlendItemRow();})())">+ 添加一种酒</button>
+                    <button class="btn-primary" type="button" onclick="calculateBlend()">计算混合后酒度</button>
                 </form>
                 <div class="result-card" id="blend-result"></div>
             </div>
@@ -134,7 +134,7 @@
                             </div>
                         </div>
                     </div>
-                    <button class="btn-primary" type="submit">反推两种酒的用量</button>
+                    <button class="btn-primary" type="button" onclick="calculateTargetBlend()">反推两种酒的用量</button>
                 </form>
                 <div class="result-card" id="target-result"></div>
             </div>
@@ -170,7 +170,7 @@
                             </div>
                         </div>
                     </div>
-                    <button class="btn-primary" type="submit">计算加水量</button>
+                    <button class="btn-primary" type="button" onclick="calculateDilution()">计算加水量</button>
                 </form>
                 <div class="result-card" id="dilute-result"></div>
             </div>
@@ -178,8 +178,7 @@
     </main>
 
     <script src="data.js?v=20260329-6"></script>
-    <script src="derived-grid.js?v=20260329-6"></script>
-    <script src="calculator.js?v=20260329-6"></script>
-    <script src="app.js?v=20260329-6"></script>
+    <script src="calculator.js?v=20260329-7"></script>
+    <script src="app.js?v=20260329-7"></script>
 </body>
 </html>

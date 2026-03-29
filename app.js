@@ -74,6 +74,7 @@ function createBlendItemRow() {
     wrapper.querySelector(".remove-blend-item").addEventListener("click", () => wrapper.remove());
     return wrapper;
 }
+window.__createBlendItemRow = createBlendItemRow;
 
 function fillExample(temp, alcohol) {
     elements.tempInput.value = temp;
@@ -252,49 +253,18 @@ function calculateDilution() {
     );
 }
 
+window.calculateTemperature = calculateTemperature;
+window.calculateConvert = calculateConvert;
+window.calculateBlend = calculateBlend;
+window.calculateTargetBlend = calculateTargetBlend;
+window.calculateDilution = calculateDilution;
+window.fillExample = fillExample;
+
 function init() {
     const range = getSupportedRange();
     elements.range.textContent = `温度换算支持范围：温度 ${range.minTemp}℃-${range.maxTemp}℃，酒精计读数 ${range.minAlcohol}%vol-${range.maxAlcohol}%vol。其余混合和换算功能基于 20℃ 密度表。`;
 
-    if (elements.tempForm) {
-        elements.tempForm.addEventListener("submit", (event) => {
-            event.preventDefault();
-            calculateTemperature();
-        });
-    }
-    if (elements.convertForm) {
-        elements.convertForm.addEventListener("submit", (event) => {
-            event.preventDefault();
-            calculateConvert();
-        });
-    }
-    if (elements.blendForm) {
-        elements.blendForm.addEventListener("submit", (event) => {
-            event.preventDefault();
-            calculateBlend();
-        });
-    }
-    if (elements.targetForm) {
-        elements.targetForm.addEventListener("submit", (event) => {
-            event.preventDefault();
-            calculateTargetBlend();
-        });
-    }
-    if (elements.diluteForm) {
-        elements.diluteForm.addEventListener("submit", (event) => {
-            event.preventDefault();
-            calculateDilution();
-        });
-    }
-
-    elements.exampleButtons.forEach((button) => {
-        button.addEventListener("click", () => fillExample(button.dataset.exampleTemp, button.dataset.exampleAlcohol));
-    });
-
     if (elements.addBlendItemButton && elements.blendItems) {
-        elements.addBlendItemButton.addEventListener("click", () => {
-            elements.blendItems.appendChild(createBlendItemRow());
-        });
         elements.blendItems.appendChild(createBlendItemRow());
         elements.blendItems.appendChild(createBlendItemRow());
     }
