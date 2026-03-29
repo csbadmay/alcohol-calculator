@@ -18,16 +18,9 @@
             <p class="range" id="range-text"></p>
         </section>
 
-        <section class="tool-tabs">
-            <button class="tool-tab active" data-tab="temp-tool">温度换算</button>
-            <button class="tool-tab" data-tab="convert-tool">重量体积</button>
-            <button class="tool-tab" data-tab="blend-tool">混合结果</button>
-            <button class="tool-tab" data-tab="target-tool">目标反推</button>
-            <button class="tool-tab" data-tab="dilute-tool">加水降度</button>
-        </section>
-
-        <section class="tool-panel active" id="temp-tool">
+        <section class="tool-panel always-open" id="temp-tool">
             <div class="calculator-card">
+                <h2 class="panel-title">温度换算</h2>
                 <form id="temp-form">
                     <div class="grid-two">
                         <div class="form-group">
@@ -63,8 +56,9 @@
             </div>
         </section>
 
-        <section class="tool-panel" id="convert-tool">
+        <section class="tool-panel always-open" id="convert-tool">
             <div class="calculator-card">
+                <h2 class="panel-title">重量体积换算</h2>
                 <form id="convert-form">
                     <div class="grid-two">
                         <div class="form-group">
@@ -91,8 +85,9 @@
             </div>
         </section>
 
-        <section class="tool-panel" id="blend-tool">
+        <section class="tool-panel always-open" id="blend-tool">
             <div class="calculator-card">
+                <h2 class="panel-title">混合结果</h2>
                 <form id="blend-form">
                     <div id="blend-items"></div>
                     <button class="ghost-button" type="button" id="add-blend-item">+ 添加一种酒</button>
@@ -102,8 +97,9 @@
             </div>
         </section>
 
-        <section class="tool-panel" id="target-tool">
+        <section class="tool-panel always-open" id="target-tool">
             <div class="calculator-card">
+                <h2 class="panel-title">目标反推</h2>
                 <form id="target-form">
                     <div class="grid-two">
                         <div class="form-group">
@@ -144,8 +140,9 @@
             </div>
         </section>
 
-        <section class="tool-panel" id="dilute-tool">
+        <section class="tool-panel always-open" id="dilute-tool">
             <div class="calculator-card">
+                <h2 class="panel-title">加水降度</h2>
                 <form id="dilute-form">
                     <div class="grid-two">
                         <div class="form-group">
@@ -180,9 +177,9 @@
         </section>
     </main>
 
-    <script src="data.js?v=20260329-4"></script>
-    <script src="derived-grid.js?v=20260329-4"></script>
-    <script src="calculator.js?v=20260329-4"></script>
-    <script src="app.js?v=20260329-4"></script>
+    <script src="data.js?v=20260329-5"></script>
+    <script src="derived-grid.js?v=20260329-5"></script>
+    <script src="calculator.js?v=20260329-5"></script>
+    <script src="app.js?v=20260329-5"></script>
 </body>
 </html>

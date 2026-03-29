@@ -10,8 +10,6 @@ const {
 } = window.AlcoholCalculator;
 
 const elements = {
-    tabs: document.querySelectorAll(".tool-tab"),
-    panels: document.querySelectorAll(".tool-panel"),
     range: document.getElementById("range-text"),
     tempForm: document.getElementById("temp-form"),
     tempInput: document.getElementById("temp-input"),
@@ -48,15 +46,6 @@ function showCard(resultElement, kind, title, detail, extra = "") {
     `;
 }
 
-function switchTab(tabId) {
-    elements.tabs.forEach((tab) => {
-        tab.classList.toggle("active", tab.dataset.tab === tabId);
-    });
-    elements.panels.forEach((panel) => {
-        panel.classList.toggle("active", panel.id === tabId);
-    });
-}
-
 function createBlendItemRow() {
     const wrapper = document.createElement("div");
     wrapper.className = "blend-item";
@@ -90,7 +79,6 @@ function fillExample(temp, alcohol) {
     elements.tempInput.value = temp;
     elements.alcoholInput.value = alcohol;
     calculateTemperature();
-    switchTab("temp-tool");
 }
 
 function calculateTemperature() {
@@ -268,41 +256,48 @@ function init() {
     const range = getSupportedRange();
     elements.range.textContent = `温度换算支持范围：温度 ${range.minTemp}℃-${range.maxTemp}℃，酒精计读数 ${range.minAlcohol}%vol-${range.maxAlcohol}%vol。其余混合和换算功能基于 20℃ 密度表。`;
 
-    elements.tabs.forEach((tab) => {
-        tab.addEventListener("click", () => switchTab(tab.dataset.tab));
-    });
-
-    elements.tempForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        calculateTemperature();
-    });
-    elements.convertForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        calculateConvert();
-    });
-    elements.blendForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        calculateBlend();
-    });
-    elements.targetForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        calculateTargetBlend();
-    });
-    elements.diluteForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        calculateDilution();
-    });
+    if (elements.tempForm) {
+        elements.tempForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            calculateTemperature();
+        });
+    }
+    if (elements.convertForm) {
+        elements.convertForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            calculateConvert();
+        });
+    }
+    if (elements.blendForm) {
+        elements.blendForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            calculateBlend();
+        });
+    }
+    if (elements.targetForm) {
+        elements.targetForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            calculateTargetBlend();
+        });
+    }
+    if (elements.diluteForm) {
+        elements.diluteForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            calculateDilution();
+        });
+    }
 
     elements.exampleButtons.forEach((button) => {
         button.addEventListener("click", () => fillExample(button.dataset.exampleTemp, button.dataset.exampleAlcohol));
     });
 
-    elements.addBlendItemButton.addEventListener("click", () => {
+    if (elements.addBlendItemButton && elements.blendItems) {
+        elements.addBlendItemButton.addEventListener("click", () => {
+            elements.blendItems.appendChild(createBlendItemRow());
+        });
         elements.blendItems.appendChild(createBlendItemRow());
-    });
-
-    elements.blendItems.appendChild(createBlendItemRow());
-    elements.blendItems.appendChild(createBlendItemRow());
+        elements.blendItems.appendChild(createBlendItemRow());
+    }
 
     clearLegacyCache();
 }
