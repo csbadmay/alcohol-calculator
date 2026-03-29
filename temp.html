@@ -52,12 +52,146 @@
         </section>
     </main>
 
-    <script src="data.js?v=20260329-9"></script>
-    <script src="calculator.js?v=20260329-9"></script>
+    <script src="data.js?v=20260329-10"></script>
     <script>
         (function () {
             function formatNumber(value, digits) {
                 return Number(value).toFixed(digits);
+            }
+
+            const correctionTable = tempCorrectionTable;
+            const sortedTemperatures = Object.keys(correctionTable).map(Number).sort((a, b) => a - b);
+
+            function getAlcoholsForTemperature(temp) {
+                return Object.keys(correctionTable[temp] || {}).map(Number).sort((a, b) => a - b);
+            }
+
+            function findNeighborBounds(sortedValues, target) {
+                if (!sortedValues.length) return null;
+                if (target < sortedValues[0] || target > sortedValues[sortedValues.length - 1]) return null;
+                if (sortedValues.includes(target)) return { lower: target, upper: target };
+                for (let i = 0; i < sortedValues.length - 1; i += 1) {
+                    const lower = sortedValues[i];
+                    const upper = sortedValues[i + 1];
+                    if (target >= lower && target <= upper) {
+                        return { lower, upper };
+                    }
+                }
+                return null;
+            }
+
+            function linearInterpolate(x, x0, x1, y0, y1) {
+                if (x0 === x1) return y0;
+                return y0 + ((x - x0) * (y1 - y0)) / (x1 - x0);
+            }
+
+            function getAlcoholBoundsForTemperature(temp, alcohol) {
+                return findNeighborBounds(getAlcoholsForTemperature(temp), alcohol);
+            }
+
+            function hasValue(temp, alcohol) {
+                return correctionTable[temp] !== undefined && correctionTable[temp][alcohol] !== undefined;
+            }
+
+            function buildBounds(tempLower, tempUpper, alcohol) {
+                const lowerBounds = getAlcoholBoundsForTemperature(tempLower, alcohol);
+                const upperBounds = getAlcoholBoundsForTemperature(tempUpper, alcohol);
+                if (!lowerBounds || !upperBounds) return null;
+
+                const alcoholLower = Math.max(lowerBounds.lower, upperBounds.lower);
+                const alcoholUpper = Math.min(lowerBounds.upper, upperBounds.upper);
+                if (alcoholLower > alcohol || alcoholUpper < alcohol) return null;
+                if (!hasValue(tempLower, alcoholLower) || !hasValue(tempUpper, alcoholLower)) return null;
+                if (!hasValue(tempLower, alcoholUpper) || !hasValue(tempUpper, alcoholUpper)) return null;
+
+                return { tempLower, tempUpper, alcoholLower, alcoholUpper };
+            }
+
+            function getCorrectionBounds(temp, alcohol) {
+                if (temp < sortedTemperatures[0] || temp > sortedTemperatures[sortedTemperatures.length - 1]) {
+                    return null;
+                }
+
+                const exactAlcoholBounds = correctionTable[temp]
+                    ? getAlcoholBoundsForTemperature(temp, alcohol)
+                    : null;
+                if (exactAlcoholBounds) {
+                    return {
+                        tempLower: temp,
+                        tempUpper: temp,
+                        alcoholLower: exactAlcoholBounds.lower,
+                        alcoholUpper: exactAlcoholBounds.upper,
+                    };
+                }
+
+                const lowerCandidates = sortedTemperatures.filter((value) => value <= temp).reverse();
+                const upperCandidates = sortedTemperatures.filter((value) => value >= temp);
+
+                for (const tempLower of lowerCandidates) {
+                    for (const tempUpper of upperCandidates) {
+                        if (tempLower > temp || tempUpper < temp || tempLower > tempUpper) continue;
+                        const bounds = buildBounds(tempLower, tempUpper, alcohol);
+                        if (bounds) return bounds;
+                    }
+                }
+
+                return null;
+            }
+
+            function explainCorrection(temp, alcohol) {
+                const bounds = getCorrectionBounds(temp, alcohol);
+                if (!bounds) return null;
+                const points = [
+                    {
+                        temp: bounds.tempLower,
+                        alcohol: bounds.alcoholLower,
+                        value: correctionTable[bounds.tempLower][bounds.alcoholLower],
+                    },
+                ];
+                if (bounds.alcoholUpper !== bounds.alcoholLower) {
+                    points.push({
+                        temp: bounds.tempLower,
+                        alcohol: bounds.alcoholUpper,
+                        value: correctionTable[bounds.tempLower][bounds.alcoholUpper],
+                    });
+                }
+                if (bounds.tempUpper !== bounds.tempLower) {
+                    points.push({
+                        temp: bounds.tempUpper,
+                        alcohol: bounds.alcoholLower,
+                        value: correctionTable[bounds.tempUpper][bounds.alcoholLower],
+                    });
+                }
+                if (bounds.tempUpper !== bounds.tempLower && bounds.alcoholUpper !== bounds.alcoholLower) {
+                    points.push({
+                        temp: bounds.tempUpper,
+                        alcohol: bounds.alcoholUpper,
+                        value: correctionTable[bounds.tempUpper][bounds.alcoholUpper],
+                    });
+                }
+                return { bounds, points };
+            }
+
+            function correctTemperature(temp, alcohol) {
+                const bounds = getCorrectionBounds(temp, alcohol);
+                if (!bounds) return null;
+
+                const { tempLower, tempUpper, alcoholLower, alcoholUpper } = bounds;
+                const read = (t, a) => correctionTable[t][a];
+
+                if (tempLower === tempUpper && alcoholLower === alcoholUpper) {
+                    return read(tempLower, alcoholLower);
+                }
+                if (tempLower === tempUpper) {
+                    return linearInterpolate(alcohol, alcoholLower, alcoholUpper, read(tempLower, alcoholLower), read(tempLower, alcoholUpper));
+                }
+                if (alcoholLower === alcoholUpper) {
+                    return linearInterpolate(temp, tempLower, tempUpper, read(tempLower, alcoholLower), read(tempUpper, alcoholLower));
+                }
+
+                const lowerTempValue = linearInterpolate(alcohol, alcoholLower, alcoholUpper, read(tempLower, alcoholLower), read(tempLower, alcoholUpper));
+                const upperTempValue = linearInterpolate(alcohol, alcoholLower, alcoholUpper, read(tempUpper, alcoholLower), read(tempUpper, alcoholUpper));
+                return linearInterpolate(temp, tempLower, tempUpper, lowerTempValue, upperTempValue);
             }
 
             function showResult(kind, title, detail, extra) {
@@ -72,11 +206,6 @@
             }
 
             window.runTempCalculator = function () {
-                if (!window.AlcoholCalculator || !window.AlcoholCalculator.correctTemperature) {
-                    showResult("error", "计算核心未加载", "请刷新页面后重试。");
-                    return;
-                }
-
                 const temp = Number.parseFloat(document.getElementById("temp-input").value);
                 const alcohol = Number.parseFloat(document.getElementById("alcohol-input").value);
 
@@ -85,21 +214,19 @@
                     return;
                 }
 
-                const result = window.AlcoholCalculator.correctTemperature(temp, alcohol);
+                const result = correctTemperature(temp, alcohol);
                 if (result === null) {
-                    const range = window.AlcoholCalculator.getSupportedRange();
                     showResult(
                         "error",
                         "当前输入超出可换算范围",
-                        `支持温度 ${range.minTemp}℃-${range.maxTemp}℃，酒精度 ${range.minAlcohol}%vol-${range.maxAlcohol}%vol。`
+                        `支持温度 ${sortedTemperatures[0]}℃-${sortedTemperatures[sortedTemperatures.length - 1]}℃。`
                     );
                     return;
                 }
 
-                const explanation = window.AlcoholCalculator.explainCorrection(temp, alcohol);
+                const explanation = explainCorrection(temp, alcohol);
                 const extra = explanation
                     ? [
-                        explanation.derivedValue !== null ? `<strong>0.1 网格值：</strong>${formatNumber(explanation.derivedValue, 3)} %vol` : "",
                         "<strong>参考表值：</strong>",
                         ...explanation.points.map((point) => `${formatNumber(point.temp, 1)}℃ / ${formatNumber(point.alcohol, 1)}%vol -> ${formatNumber(point.value, 2)}`),
                     ].filter(Boolean).join("<br>")
@@ -119,12 +246,7 @@
                 window.runTempCalculator();
             };
 
-            if (window.AlcoholCalculator && window.AlcoholCalculator.getSupportedRange) {
-                const range = window.AlcoholCalculator.getSupportedRange();
-                document.getElementById("range-text").textContent = `支持范围：温度 ${range.minTemp}℃-${range.maxTemp}℃，酒精计读数 ${range.minAlcohol}%vol-${range.maxAlcohol}%vol。`;
-            } else {
-                document.getElementById("range-text").textContent = "支持范围读取失败，请刷新页面重试。";
-            }
+            document.getElementById("range-text").textContent = `支持范围：温度 ${sortedTemperatures[0]}℃-${sortedTemperatures[sortedTemperatures.length - 1]}℃，酒精计读数按表 B.1 插值换算。`;
         })();
     </script>
 </body>
