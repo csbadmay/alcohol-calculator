@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>温度换算</title>
-    <link rel="stylesheet" href="style.css?v=20260329-8">
+    <link rel="stylesheet" href="style.css?v=20260329-9">
 </head>
 <body>
     <main class="shell">
-        <a class="back-link" href="./index.html?v=20260329-8">返回功能首页</a>
+        <a class="back-link" href="./index.html?v=20260329-9">返回功能首页</a>
         <section class="hero">
             <p class="eyebrow">表 B.1</p>
             <h1>温度换算</h1>
@@ -52,8 +52,80 @@
         </section>
     </main>
 
-    <script src="data.js?v=20260329-8"></script>
-    <script src="calculator.js?v=20260329-8"></script>
-    <script src="temp.js?v=20260329-8"></script>
+    <script src="data.js?v=20260329-9"></script>
+    <script src="calculator.js?v=20260329-9"></script>
+    <script>
+        (function () {
+            function formatNumber(value, digits) {
+                return Number(value).toFixed(digits);
+            }
+
+            function showResult(kind, title, detail, extra) {
+                const result = document.getElementById("temp-result");
+                result.className = "result-card show " + kind;
+                result.innerHTML = `
+                    <p class="result-status">${kind === "error" ? "无法计算" : "换算结果"}</p>
+                    <p class="result-output">${title}</p>
+                    <p class="result-detail">${detail}</p>
+                    ${extra ? `<div class="result-basis">${extra}</div>` : ""}
+                `;
+            }
+
+            window.runTempCalculator = function () {
+                if (!window.AlcoholCalculator || !window.AlcoholCalculator.correctTemperature) {
+                    showResult("error", "计算核心未加载", "请刷新页面后重试。");
+                    return;
+                }
+
+                const temp = Number.parseFloat(document.getElementById("temp-input").value);
+                const alcohol = Number.parseFloat(document.getElementById("alcohol-input").value);
+
+                if (Number.isNaN(temp) || Number.isNaN(alcohol)) {
+                    showResult("error", "请输入有效数字", "温度和酒精计读数都支持输入小数，例如 24.5 和 10.8。");
+                    return;
+                }
+
+                const result = window.AlcoholCalculator.correctTemperature(temp, alcohol);
+                if (result === null) {
+                    const range = window.AlcoholCalculator.getSupportedRange();
+                    showResult(
+                        "error",
+                        "当前输入超出可换算范围",
+                        `支持温度 ${range.minTemp}℃-${range.maxTemp}℃，酒精度 ${range.minAlcohol}%vol-${range.maxAlcohol}%vol。`
+                    );
+                    return;
+                }
+
+                const explanation = window.AlcoholCalculator.explainCorrection(temp, alcohol);
+                const extra = explanation
+                    ? [
+                        explanation.derivedValue !== null ? `<strong>0.1 网格值：</strong>${formatNumber(explanation.derivedValue, 3)} %vol` : "",
+                        "<strong>参考表值：</strong>",
+                        ...explanation.points.map((point) => `${formatNumber(point.temp, 1)}℃ / ${formatNumber(point.alcohol, 1)}%vol -> ${formatNumber(point.value, 2)}`),
+                    ].filter(Boolean).join("<br>")
+                    : "";
+
+                showResult(
+                    "success",
+                    `${formatNumber(result, 2)} %vol`,
+                    `输入 ${formatNumber(temp, 1)}℃ / ${formatNumber(alcohol, 1)}%vol，折算为 20℃ 标准酒精度。`,
+                    extra
+                );
+            };
+
+            window.fillTempExample = function (temp, alcohol) {
+                document.getElementById("temp-input").value = temp;
+                document.getElementById("alcohol-input").value = alcohol;
+                window.runTempCalculator();
+            };
+
+            if (window.AlcoholCalculator && window.AlcoholCalculator.getSupportedRange) {
+                const range = window.AlcoholCalculator.getSupportedRange();
+                document.getElementById("range-text").textContent = `支持范围：温度 ${range.minTemp}℃-${range.maxTemp}℃，酒精计读数 ${range.minAlcohol}%vol-${range.maxAlcohol}%vol。`;
+            } else {
+                document.getElementById("range-text").textContent = "支持范围读取失败，请刷新页面重试。";
+            }
+        })();
+    </script>
 </body>
 </html>
