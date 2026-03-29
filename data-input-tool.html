@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>附录B数据录入（支持分页）</title>
+    <style>
+        body { font-family: Arial; padding: 20px; max-width: 1200px; margin: 0 auto; }
+        textarea { width: 100%; height: 200px; font-family: monospace; font-size: 12px; margin: 10px 0; }
+        button { padding: 10px 20px; font-size: 16px; margin: 5px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-secondary { background: #95a5a6; }
+        .result { background: #f5f5f5; padding: 15px; margin-top: 20px; border-radius: 5px; max-height: 400px; overflow: auto; }
+        .info { background: #e3f2fd; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; padding: 10px; margin: 10px 0; border-radius: 5px; color: #155724; }
+        pre { font-size: 11px; }
+    </style>
+</head>
+<body>
+    <h2>GB 5009.225-2023 附录B数据录入（支持分页）</h2>
+
+    <div class="info">
+        <strong>使用说明：</strong><br>
+        1. 从 PDF 复制<strong>第一页</strong>表格数据，粘贴到下方<br>
+        2. 点击"添加这一页"<br>
+        3. 继续复制<strong>下一页</strong>，点击"添加这一页"<br>
+        4. 重复直到所有页面添加完成<br>
+        5. 点击"查看完整数据"确认<br>
+        6. 点击"下载 data.js"
+    </div>
+
+    <div id="status" class="success" style="display:none;"></div>
+
+    <h3>粘贴当前页数据：</h3>
+    <textarea id="input" placeholder="粘贴一页表格数据..."></textarea>
+
+    <button onclick="addPage()">添加这一页</button>
+    <button onclick="viewData()" class="btn-secondary">查看完整数据</button>
+    <button onclick="downloadData()">下载 data.js</button>
+    <button onclick="clearAll()" class="btn-secondary">清空重来</button>
+
+    <div class="result" id="output"></div>
+
+    <script>
+        let allData = {};
+        let pageCount = 0;
+
+        function addPage() {
+            const text = document.getElementById('input').value.trim();
+            if (!text) {
+                alert('请先粘贴数据');
+                return;
+            }
+
+            const lines = text.split('\n').filter(line => line.trim());
+            let temperatures = [];
+            let dataRows = [];
+
+            for (let line of lines) {
+                const parts = line.trim().split(/\s+/);
+
+                // 查找温度行（包含多个10-40之间的数字）
+                const tempCandidates = parts.map(p => parseFloat(p)).filter(n => !isNaN(n) && n >= 0 && n <= 40);
+                if (tempCandidates.length >= 5 && temperatures.length === 0) {
+                    temperatures = tempCandidates;
+                    continue;
+                }
+
+                // 数据行：第一个是酒精度（0-100）
+                const alcoholKey = parseFloat(parts[0]);
+                if (!isNaN(alcoholKey) && alcoholKey >= 0 && alcoholKey <= 100) {
+                    // 提取所有数值（排除第一个和可能重复的最后一个）
+                    const values = [];
+                    for (let i = 1; i < parts.length; i++) {
+                        const val = parseFloat(parts[i]);
+                        if (!isNaN(val) && val !== alcoholKey) {
+                            values.push(val);
+                        }
+                    }
+                    if (values.length > 0) {
+                        dataRows.push({ alcohol: alcoholKey, values: values });
+                    }
+                }
+            }
+
+            // 合并数据
+            if (temperatures.length > 0 && dataRows.length > 0) {
+                temperatures.forEach(temp => {
+                    if (!allData[temp]) allData[temp] = {};
+                });
+
+                dataRows.forEach(row => {
+                    row.values.forEach((val, idx) => {
+                        if (idx < temperatures.length) {
+                            allData[temperatures[idx]][row.alcohol] = val;
+                        }
+                    });
+                });
+
+                pageCount++;
+                document.getElementById('status').style.display = 'block';
+                document.getElementById('status').innerHTML = `✓ 已添加第 ${pageCount} 页数据（温度: ${temperatures.join(', ')}°C）`;
+                document.getElementById('input').value = '';
+            } else {
+                alert('解析失败，请检查数据格式');
+            }
+        }
+
+        function viewData() {
+            const output = document.getElementById('output');
+            const temps = Object.keys(allData).sort((a, b) => parseFloat(a) - parseFloat(b));
+            output.innerHTML = '<h3>已录入数据：</h3>' +
+                '<p>温度范围: ' + temps.join(', ') + '°C</p>' +
+                '<p>总共 ' + temps.length + ' 个温度点</p>' +
+                '<pre>' + JSON.stringify(allData, null, 2).substring(0, 2000) + '...</pre>';
+        }
+
+        function downloadData() {
+            if (Object.keys(allData).length === 0) {
+                alert('请先添加数据');
+                return;
+            }
+
+            const content = `// GB 5009.225-2023 附录B数据
+const tempCorrectionTable = ${JSON.stringify(allData, null, 2)};
+
+// 附录A密度数据
+const densityTable = {
+  0: 0.99823, 10: 0.98694, 20: 0.97642, 30: 0.96662, 40: 0.95747,
+  50: 0.94891, 60: 0.94090, 70: 0.93340, 80: 0.92639, 90: 0.91982, 100: 0.91368
+};`;
+
+            const blob = new Blob([content], { type: 'text/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'data.js';
+            a.click();
+            alert('data.js 已下载！请替换项目中的 data.js 文件，然后刷新浏览器');
+        }
+
+        function clearAll() {
+            if (confirm('确定要清空所有数据吗？')) {
+                allData = {};
+                pageCount = 0;
+                document.getElementById('input').value = '';
+                document.getElementById('output').innerHTML = '';
+                document.getElementById('status').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

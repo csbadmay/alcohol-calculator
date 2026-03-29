@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>酒精计温度换算器</title>
+    <link rel="stylesheet" href="style.css?v=20260329-2">
+    <link rel="manifest" href="manifest.json?v=20260329-2">
+</head>
+<body>
+    <main class="shell">
+        <section class="hero">
+            <p class="eyebrow">GB 5009.225-2023 表 B.1</p>
+            <h1>酒精计温度换算器</h1>
+            <p class="intro">输入蒸馏后酒样的酒精计读数和测量温度，直接换算出 20℃ 标准酒精度。</p>
+            <p class="range" id="range-text"></p>
+        </section>
+
+        <section class="calculator-card">
+            <form id="calculator-form">
+                <div class="form-group">
+                    <label for="temp-input">测量温度</label>
+                    <div class="input-row">
+                        <input type="number" id="temp-input" step="0.1" inputmode="decimal" placeholder="例如 24.5" required>
+                        <span class="unit">℃</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="alcohol-input">酒精计读数</label>
+                    <div class="input-row">
+                        <input type="number" id="alcohol-input" step="0.1" inputmode="decimal" placeholder="例如 10.8" required>
+                        <span class="unit">%vol</span>
+                    </div>
+                </div>
+
+                <button class="btn-primary" type="submit">换算到 20℃</button>
+            </form>
+
+            <div class="examples">
+                <span>快速示例</span>
+                <button type="button" data-example-temp="24.5" data-example-alcohol="10.8">24.5℃ / 10.8</button>
+                <button type="button" data-example-temp="15.5" data-example-alcohol="52.3">15.5℃ / 52.3</button>
+            </div>
+
+            <div class="result-card" id="result">
+                <p class="result-status" id="result-status">换算结果</p>
+                <p class="result-output" id="result-output">等待输入</p>
+                <p class="result-detail" id="result-detail">输入温度和酒精计读数后，这里会显示 20℃ 标准酒精度。</p>
+                <div class="result-basis" id="result-basis"></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="data.js?v=20260329-3"></script>
+    <script src="derived-grid.js?v=20260329-3"></script>
+    <script src="calculator.js?v=20260329-3"></script>
+    <script src="app.js?v=20260329-3"></script>
+</body>
+</html>

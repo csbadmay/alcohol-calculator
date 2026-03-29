@@ -1,0 +1,5 @@
+<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" fill="#667eea" rx="80"/>
+  <text x="256" y="320" font-family="Arial" font-size="200" font-weight="bold" fill="white" text-anchor="middle">酒</text>
+  <text x="256" y="420" font-family="Arial" font-size="60" fill="white" text-anchor="middle" opacity="0.9">GB 5009</text>
+</svg>
