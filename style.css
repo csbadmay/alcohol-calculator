@@ -37,6 +37,40 @@ body {
     gap: 18px;
 }
 
+.back-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.nav-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.nav-card {
+    display: block;
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 18px;
+    box-shadow: 0 16px 32px rgba(80, 54, 21, 0.08);
+}
+
+.nav-card h2 {
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.nav-card p {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
 .tool-panel {
     display: block;
     border: 1px solid var(--line);

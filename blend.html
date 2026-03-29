@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>混合结果</title>
+    <link rel="stylesheet" href="style.css?v=20260329-8">
+</head>
+<body>
+    <main class="shell">
+        <a class="back-link" href="./index.html?v=20260329-8">返回功能首页</a>
+        <section class="hero">
+            <p class="eyebrow">表 A.1</p>
+            <h1>混合结果</h1>
+            <p class="intro">输入两种或多种不同酒度、不同单位的酒，计算混合后的酒度、重量和体积。</p>
+        </section>
+
+        <section class="tool-panel">
+            <div class="calculator-card">
+                <div id="blend-items"></div>
+                <button class="ghost-button" type="button" onclick="addBlendItem()">+ 添加一种酒</button>
+                <button class="btn-primary" type="button" onclick="runBlendCalculator()">计算混合后酒度</button>
+                <div class="result-card" id="blend-result"></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="data.js?v=20260329-8"></script>
+    <script src="calculator.js?v=20260329-8"></script>
+    <script src="blend.js?v=20260329-8"></script>
+</body>
+</html>

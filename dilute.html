@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>加水降度</title>
+    <link rel="stylesheet" href="style.css?v=20260329-8">
+</head>
+<body>
+    <main class="shell">
+        <a class="back-link" href="./index.html?v=20260329-8">返回功能首页</a>
+        <section class="hero">
+            <p class="eyebrow">表 A.1</p>
+            <h1>加水降度</h1>
+            <p class="intro">已知原酒酒度和数量，输入目标酒度，计算需要加多少水。</p>
+        </section>
+
+        <section class="tool-panel">
+            <div class="calculator-card">
+                <div class="grid-two">
+                    <div class="form-group">
+                        <label for="dilute-source-alcohol">原酒酒度</label>
+                        <div class="input-row">
+                            <input type="number" id="dilute-source-alcohol" step="0.1" inputmode="decimal" placeholder="例如 95">
+                            <span class="unit">%vol</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="dilute-source-amount">原酒数量</label>
+                        <div class="input-row">
+                            <input type="number" id="dilute-source-amount" step="0.001" inputmode="decimal" placeholder="例如 10">
+                            <select class="unit-select" id="dilute-source-unit">
+                                <option value="weight">公斤</option>
+                                <option value="volume">升</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="dilute-target-alcohol">目标酒度</label>
+                        <div class="input-row">
+                            <input type="number" id="dilute-target-alcohol" step="0.1" inputmode="decimal" placeholder="例如 42">
+                            <span class="unit">%vol</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-primary" type="button" onclick="runDiluteCalculator()">计算加水量</button>
+                <div class="result-card" id="dilute-result"></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="data.js?v=20260329-8"></script>
+    <script src="calculator.js?v=20260329-8"></script>
+    <script src="dilute.js?v=20260329-8"></script>
+</body>
+</html>

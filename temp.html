@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>温度换算</title>
+    <link rel="stylesheet" href="style.css?v=20260329-8">
+</head>
+<body>
+    <main class="shell">
+        <a class="back-link" href="./index.html?v=20260329-8">返回功能首页</a>
+        <section class="hero">
+            <p class="eyebrow">表 B.1</p>
+            <h1>温度换算</h1>
+            <p class="intro">输入蒸馏后酒样的酒精计读数和测量温度，换算成 20℃ 标准酒精度。</p>
+            <p class="range" id="range-text">正在读取支持范围…</p>
+        </section>
+
+        <section class="tool-panel">
+            <div class="calculator-card">
+                <div class="grid-two">
+                    <div class="form-group">
+                        <label for="temp-input">测量温度</label>
+                        <div class="input-row">
+                            <input type="number" id="temp-input" step="0.1" inputmode="decimal" placeholder="例如 24.5">
+                            <span class="unit">℃</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="alcohol-input">酒精计读数</label>
+                        <div class="input-row">
+                            <input type="number" id="alcohol-input" step="0.1" inputmode="decimal" placeholder="例如 10.8">
+                            <span class="unit">%vol</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-primary" type="button" onclick="runTempCalculator()">换算到 20℃</button>
+
+                <div class="examples">
+                    <span>快速示例</span>
+                    <button type="button" onclick="fillTempExample(24.5, 10.8)">24.5℃ / 10.8</button>
+                    <button type="button" onclick="fillTempExample(15.5, 52.3)">15.5℃ / 52.3</button>
+                </div>
+
+                <div class="result-card" id="temp-result">
+                    <p class="result-status">换算结果</p>
+                    <p class="result-output">等待输入</p>
+                    <p class="result-detail">输入温度和酒精计读数后，这里会显示 20℃ 标准酒精度。</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="data.js?v=20260329-8"></script>
+    <script src="calculator.js?v=20260329-8"></script>
+    <script src="temp.js?v=20260329-8"></script>
+</body>
+</html>
