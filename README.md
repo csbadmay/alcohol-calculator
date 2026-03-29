@@ -31,8 +31,12 @@ node calculator.test.js
 
 ## 项目文件
 
-- `index.html`: 多功能手机界面
-- `calculator.js`: 温度换算、密度、混合和降度计算核心
-- `app.js`: 表单交互
+- `index.html`: 功能首页
+- `temp.html`: 温度换算页面
+- `convert.html`: 重量体积换算页面
+- `blend.html`: 混合结果页面
+- `target.html`: 目标反推页面
+- `dilute.html`: 加水降度页面
+- `calculator.js`: Node 侧计算核心与校验脚本依赖
 - `data.js`: 表 A.1 / 表 B.1 数据
 - `derived-grid.js`: 温度换算 0.1 网格派生数据
